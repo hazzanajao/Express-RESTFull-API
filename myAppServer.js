@@ -10,7 +10,7 @@ myAppServer.use(express.static("public") );
 
 //1. Connecting to our db
 mongoose.set('strictQuery', false);
-const mongoDB = "mongodb+srv://your_username:your_password@cluster0.myxqth0.mongodb.net/your_DB"
+const mongoDB = "mongodb+srv://h-Ajao:h-Ajao-2023@cluster0.myxqth0.mongodb.net/expressDB"
 main().catch(err => console.log(err));
 async function main() {
     await mongoose.connect(mongoDB);
@@ -28,14 +28,17 @@ const Book = mongoose.model( "Book", bookSchema);
 
 //4. bodyParser is needed to pass our data
 myAppServer.use(bodyParser.urlencoded({ extended:true}));
-/*****************************************************************
- *  // Best option from Express Reference Documentation
- *  - app.route("/url").get().post().delete() -
- *
- *
- *  Implementation:
 
- app.route("/books")
+//5. needed for template engine
+myAppServer.set('view engine', 'ejs');
+
+
+////////////////////// Targeting all route //////////////////////////////////////
+// Best option from Express Reference Documentation
+//- app.route("/url").get().post().delete() -
+
+
+myAppServer.route("/books")
 
  .get( (req, res)=> {
     Book.find( function (err, searchedBooks){
@@ -72,12 +75,12 @@ myAppServer.use(bodyParser.urlencoded({ extended:true}));
  });
 
 });
- *********************************************************************/
 
+///////////////////////// End /////////////////////////////////////////
+/********************** previous approach *******************************************
 
-/***
-* Implementing get() Method
-***********************************/
+ //Implementing get() Method
+
 
 myAppServer.get("/books", (req, res)=> {
 
@@ -91,9 +94,8 @@ myAppServer.get("/books", (req, res)=> {
     });
 });
 
-/***
- * Implementing post() Method
- ***********************************/
+//Implementing post() Method
+
 
 myAppServer.post("/books", (req,res)=>{
 
@@ -112,9 +114,8 @@ myAppServer.post("/books", (req,res)=>{
     });
 });
 
-/***
- * Implementing delete() Method
- ***********************************/
+//Implementing delete() Method
+
 
 
 myAppServer.delete("/books", (req,res)=>{
@@ -129,15 +130,66 @@ myAppServer.delete("/books", (req,res)=>{
  });
 
 });
+ *********************************************************************/
 
 
-//5. needed for template engine
-myAppServer.set('view engine', 'ejs');
+
+/////////// Request for targeting a specific route ////////////////////
 
 
+myAppServer.route("/books/:bookTitle")
+    .get( (req, res) => {
+
+        Book.findOne({title:req.params.bookTitle}, function(err, foundBook){
+            if(foundBook ) {
+                res.send(foundBook );
+            } else {
+                res.send("No such book here !")
+            }
+        });
+    })
+
+    .put( function (req, res) {
+
+        Book.updateOne(
+            {title:req.params.bookTitle},
+            {title: req.body.title,  description: req.body.description},
+            {overwrite: true},
+            function (err){
+                if(!err){
+                    res.send("updated successfully !")
+                }
+            }
+        );
+    })
+    .patch( function ( req, res){
+        Book.updateOne(
+            {title: req.params.bookTile },
+            {$set:req.body},
+            function(err){
+                if(!err){
+                    res.send(" Successfully patched !")
+                } else {
+                    res.send( err);
+                }
+        }
+        );
+    })
+    .delete( function(req, res){
+        Book.deleteOne(
+            {title: req.params.bookTitle},
+            function(err){
+                if(!err){
+                    res.send( "Successfully deleted !");
+                } else {
+                    res.send( err);
+                }
+        });
+    });
 
 myAppServer.listen(5000, ()=>{
     console.log( " myAppServer is running on port 5000");
 });
 
 // NB: I used arrow function instead of anonymous function
+
