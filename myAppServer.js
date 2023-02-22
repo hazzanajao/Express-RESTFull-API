@@ -10,7 +10,7 @@ myAppServer.use(express.static("public") );
 
 //1. Connecting to our db
 mongoose.set('strictQuery', false);
-const mongoDB = "mongodb+srv://h-Ajao:h-Ajao-2023@cluster0.myxqth0.mongodb.net/expressDB"
+const mongoDB = "mongodb+srv://username:password@cluster0.myxqth0.mongodb.net/expressDB"
 main().catch(err => console.log(err));
 async function main() {
     await mongoose.connect(mongoDB);
